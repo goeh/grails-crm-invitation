@@ -28,13 +28,15 @@ class CrmInvitation {
     public static final int DENIED = 8
     public static final int EXPIRED = 9
 
+    def crmCoreService
+
     // TODO only CREATED and SENT is necessary if instance is logged and removed when accepted, denied or expired.
 
     String guid
     String ref
     String sender
     String receiver
-    //String message
+    String param
     int status
     Date dateCreated
 
@@ -43,9 +45,11 @@ class CrmInvitation {
         ref(maxSize: 80, nullable: true)
         sender(maxSize: 80, blank: false) // username of sender
         receiver(maxSize: 80, blank: false, email: true) // email of invited user
-        //message(maxSize: 2000, nullable: true, widget: 'textarea') // optional message to invited
+        param(maxSize: 255, nullable: true)
         status(inList: [CREATED, SENT, ACCEPTED, DENIED, EXPIRED])
     }
+
+    static transients = ['reference']
 
     static namedQueries = {
         pending {
@@ -57,5 +61,17 @@ class CrmInvitation {
         if (!guid) {
             guid = java.util.UUID.randomUUID().toString()
         }
+    }
+
+    transient void setReference(object) {
+        ref = crmCoreService.getReferenceIdentifier(object)
+    }
+
+    transient Object getReference() {
+        crmCoreService.getReference(ref)
+    }
+
+    String toString() {
+        receiver
     }
 }

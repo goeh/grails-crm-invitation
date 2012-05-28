@@ -17,6 +17,11 @@
 
 package grails.plugins.crm.invitation
 
+import grails.plugins.crm.core.TenantUtils
+
+/**
+ * Invitation service for Grails CRM.
+ */
 class CrmInvitationService {
 
     static transactional = true
@@ -25,7 +30,17 @@ class CrmInvitationService {
     def crmCoreService
     def textTemplateService
 
-    def createInvitation(Object reference, String senderUsername, String receiverEmail, String emailTemplate = null, Map binding = null) {
+    /**
+     * Create new invitation.
+     *
+     * @param reference reference identifier for invited resource
+     * @param senderUsername inviting user
+     * @param receiverEmail invited user
+     * @param emailTemplate text template name for invitation email
+     * @param binding template binding
+     * @return The created CrmInvitation instance
+     */
+    def createInvitation(Object reference, String param, String senderUsername, String receiverEmail, String emailTemplate = null, Map binding = null) {
         if (!senderUsername) {
             throw new IllegalArgumentException("argument [senderUsername] is mandatory")
         }
@@ -33,14 +48,50 @@ class CrmInvitationService {
             throw new IllegalArgumentException("argument [receiverEmail] is mandatory")
         }
         def ref = crmCoreService.getReferenceIdentifier(reference)
-        def i = new CrmInvitation(ref: ref, sender: senderUsername, receiver: receiverEmail).save(failOnError: true, flush: true)
+        def i = new CrmInvitation(ref: ref, sender: senderUsername, receiver: receiverEmail, param:param).save(failOnError: true, flush: true)
 
         if (emailTemplate) {
             binding.invitation = i
             sendInvitationEmail(i, emailTemplate, binding)
         }
+        return i
     }
 
+    /**
+     * List invitations for a reference object.
+     *
+     * @param reference reference object
+     * @param tenant optional tenant id
+     * @return list of invitations for the object
+     */
+    List getInvitationsFor(reference, Long tenant = TenantUtils.tenant) {
+        CrmInvitation.createCriteria().list([sort:'dateCreated', order:'asc']) {
+            eq('tenantId', tenant)
+            eq('ref', crmCoreService.getReferenceIdentifier(reference))
+        }
+    }
+
+    /**
+     * List invitations for a user.
+     *
+     * @param email invited user
+     * @param tenant optional tenant id
+     * @return list of invitations sent to the user
+     */
+    List getInvitationsTo(String email, Long tenant = TenantUtils.tenant) {
+        CrmInvitation.createCriteria().list([sort:'dateCreated', order:'asc']) {
+            eq('tenantId', tenant)
+            eq('receiver', email)
+        }
+    }
+
+    /**
+     * Send invitation email to a user.
+     *
+     * @param invitation CrmInvitation instance
+     * @param template email template
+     * @param binding template binding
+     */
     void sendInvitationEmail(CrmInvitation invitation, String template, Map binding = [:]) {
         def config = grailsApplication.config.crm.invitation.email
         def bodyText = textTemplateService.applyTemplate(template, "text/plain", binding)

@@ -43,7 +43,7 @@ class CrmInvitationServiceSpec extends grails.plugin.spock.IntegrationSpec {
         <p>\${message}</p>
         """)
         when:
-        crmInvitationService.createInvitation("test", "grails", "joe@acme.com", "invitation-email", [message: "Hello World"])
+        crmInvitationService.createInvitation("test", null, "grails", "joe@acme.com", "invitation-email", [message: "Hello World"])
 
         then:
         greenMail.getReceivedMessages().length == 1
@@ -56,6 +56,22 @@ class CrmInvitationServiceSpec extends grails.plugin.spock.IntegrationSpec {
         GreenMailUtil.getBody(message).contains('<p>Hello World</p>')
         GreenMailUtil.getAddressList(message.from) == 'test@test.it'
         message.subject == 'Invitation'
+    }
+
+    def "list invitation for an object"() {
+        when:
+        crmInvitationService.createInvitation("test", null, "grails", "joe@acme.com")
+
+        then:
+        crmInvitationService.getInvitationsFor("test").size() == 1
+
+        when:
+        crmInvitationService.createInvitation("test", null, "grails", "liza@acme.com")
+
+        then:
+        crmInvitationService.getInvitationsFor("test").size() == 2
+        crmInvitationService.getInvitationsTo("joe@acme.com").size() == 1
+        crmInvitationService.getInvitationsTo("liza@acme.com").size() == 1
     }
 
 }

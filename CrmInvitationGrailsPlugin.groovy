@@ -17,7 +17,7 @@
 
 class CrmInvitationGrailsPlugin {
     def groupId = "grails.crm"
-    def version = "0.9.0"
+    def version = "0.9.1"
     def grailsVersion = "2.0 > *"
     def dependsOn = [:]
     def pluginExcludes = [
@@ -41,7 +41,7 @@ class CrmInvitationGrailsPlugin {
 //    def developers = [ [ name: "Joe Bloggs", email: "joe@bloggs.net" ]]
 
     // Location of the plugin's issue tracker.
-    def issueManagement = [ system: "GITHUB", url: "https://github.com/goeh/grails-crm-invitation/issues" ]
+    def issueManagement = [ system: "github", url: "https://github.com/goeh/grails-crm-invitation/issues" ]
 
     // Online location of the plugin's browseable source code.
     def scm = [ url: "https://github.com/goeh/grails-crm-invitation" ]

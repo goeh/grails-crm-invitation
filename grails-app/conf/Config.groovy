@@ -25,3 +25,6 @@ log4j = {
 
 grails.mail.port = com.icegreen.greenmail.util.ServerSetupTest.SMTP.port
 grails.mail.default.from = "nobody@nowhere.net"
+
+grails.views.default.codec="none" // none, html, base64
+grails.views.gsp.encoding="UTF-8"
