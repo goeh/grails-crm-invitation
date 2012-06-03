@@ -28,13 +28,16 @@
                         <h4>${reference.encodeAsHTML()}</h4>
                         <tt:html name="crmInvitation.index.main">
                             <p>
-                                ${invitation.sender.encodeAsHTML()} bjuder in dig till Avtala.se.
-                                Genom att accepera denna inbjudan får du inte bara tillgång till en bra tjänst för dina egna avtal.
-                                Du får dessutom behörighet att ta del av avtalen som ${invitation.sender.encodeAsHTML()} registrerat.
+                                ${invitation.sender.encodeAsHTML()} bjuder in dig till tjänsten <g:message
+                                        code="app.name" default=""/>.
+                                Genom att accepera denna inbjudan får du inte bara tillgång till en bra tjänst för ditt eget bruk.
+                                Du får dessutom behörighet att ta del av informationen som ${invitation.sender.encodeAsHTML()} registrerat.
                             </p>
                         </tt:html>
-                        <button name="_action_accept" class="btn btn-primary">Accept</button>
-                        <button name="_action_deny" class="btn btn-danger">Deny</button>
+                        <button type="submit" name="_action_accept" class="btn btn-primary"><i class="icon-ok icon-white"></i>
+                            <g:message code="crmInvitation.button.accept.label" default="Accept"/></button>
+                        <button type="submit" name="_action_deny" class="btn btn-danger"><i class="icon-remove icon-white"></i>
+                            <g:message code="crmInvitation.button.deny.label" default="Deny"/></button>
                     </g:form>
                 </div>
             </g:each>

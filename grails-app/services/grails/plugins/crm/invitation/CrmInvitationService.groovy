@@ -67,6 +67,7 @@ class CrmInvitationService {
         CrmInvitation.createCriteria().list([sort:'dateCreated', order:'asc']) {
             eq('tenantId', tenant)
             eq('ref', crmCoreService.getReferenceIdentifier(reference))
+            inList('status', [CrmInvitation.CREATED, CrmInvitation.SENT])
         }
     }
 
@@ -81,6 +82,7 @@ class CrmInvitationService {
         CrmInvitation.createCriteria().list([sort:'dateCreated', order:'asc']) {
             eq('tenantId', tenant)
             eq('receiver', email)
+            inList('status', [CrmInvitation.CREATED, CrmInvitation.SENT])
         }
     }
 

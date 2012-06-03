@@ -16,7 +16,7 @@
 
 class CrmInvitationGrailsPlugin {
     def groupId = "grails.crm"
-    def version = "0.9.2"
+    def version = "0.9.3"
     def grailsVersion = "2.0 > *"
     def dependsOn = [:]
     def pluginExcludes = [
@@ -32,5 +32,4 @@ class CrmInvitationGrailsPlugin {
     def organization = [ name: "Technipelago AB", url: "http://www.technipelago.se/" ]
     def issueManagement = [ system: "github", url: "https://github.com/goeh/grails-crm-invitation/issues" ]
     def scm = [ url: "https://github.com/goeh/grails-crm-invitation" ]
-
 }

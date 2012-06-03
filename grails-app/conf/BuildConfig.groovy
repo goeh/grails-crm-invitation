@@ -40,13 +40,15 @@ grails.project.dependency.resolution = {
         runtime(":hibernate:$grailsVersion") {
             export = false
         }
-        runtime ":mail:1.0"
-        runtime ":text-template:latest.integration"
 
         test    ':spock:latest.integration'
         test    ':greenmail:latest.integration'
 
         compile "grails.crm:crm-core:latest.integration"
+
+        runtime ":mail:1.0"
+        runtime ":text-template:latest.integration"
+        runtime ":spring-events:1.2.1"
     }
 }
 

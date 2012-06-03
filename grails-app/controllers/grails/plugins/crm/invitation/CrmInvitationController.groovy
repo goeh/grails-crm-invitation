@@ -32,10 +32,10 @@ class CrmInvitationController {
     def accept(Long id) {
         def crmInvitation = CrmInvitation.get(id)
         if (crmInvitation) {
-            //crmInvitation.status = CrmInvitation.ACCEPTED
-            //crmInvitation.save()
+            crmInvitation.status = CrmInvitation.ACCEPTED
+            crmInvitation.save()
             publishEvent(new InvitationAcceptedEvent(crmInvitation))
-            flash.success(message(code:"crmInvitation.accepted.message", default:"Invitation accepted"))
+            flash.success = message(code:"crmInvitation.accepted.message", default:"Invitation accepted")
         } else {
             flash.error = message(code: 'default.not.found.message', args: [message(code: 'crmInvitation.label', default: 'Invitation'), params.id])
         }
@@ -45,10 +45,10 @@ class CrmInvitationController {
     def deny(Long id) {
         def crmInvitation = CrmInvitation.get(id)
         if (crmInvitation) {
-            //crmInvitation.status = CrmInvitation.DENIED
-            //crmInvitation.save()
+            crmInvitation.status = CrmInvitation.DENIED
+            crmInvitation.save()
             publishEvent(new InvitationDeniedEvent(crmInvitation))
-            flash.warning(message(code:"crmInvitation.denied.message", default:"Invitation denied"))
+            flash.warning = message(code:"crmInvitation.denied.message", default:"Invitation denied")
         } else {
             flash.error = message(code: 'default.not.found.message', args: [message(code: 'crmInvitation.label', default: 'Invitation'), params.id])
         }
