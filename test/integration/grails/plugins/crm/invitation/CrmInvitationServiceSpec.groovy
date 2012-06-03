@@ -74,4 +74,31 @@ class CrmInvitationServiceSpec extends grails.plugin.spock.IntegrationSpec {
         crmInvitationService.getInvitationsTo("liza@acme.com").size() == 1
     }
 
+    def "accept invitation"() {
+        given:
+        def i = crmInvitationService.createInvitation("test", "guest", "grails", "joe@acme.com")
+
+        expect:
+        i.status == CrmInvitation.CREATED
+
+        when:
+        crmInvitationService.accept(i)
+
+        then:
+        i.status == CrmInvitation.ACCEPTED
+    }
+
+    def "deny invitation"() {
+        given:
+        def i = crmInvitationService.createInvitation("test", "guest", "grails", "joe@acme.com")
+
+        expect:
+        i.status == CrmInvitation.CREATED
+
+        when:
+        crmInvitationService.deny(i)
+
+        then:
+        i.status == CrmInvitation.DENIED
+    }
 }

@@ -17,6 +17,7 @@
 package grails.plugins.crm.invitation
 
 import grails.plugins.crm.core.TenantUtils
+import javax.servlet.http.HttpServletResponse
 
 class CrmInvitationController {
 
@@ -32,12 +33,16 @@ class CrmInvitationController {
     def accept(Long id) {
         def crmInvitation = CrmInvitation.get(id)
         if (crmInvitation) {
-            crmInvitation.status = CrmInvitation.ACCEPTED
-            crmInvitation.save()
-            publishEvent(new InvitationAcceptedEvent(crmInvitation))
-            flash.success = message(code:"crmInvitation.accepted.message", default:"Invitation accepted")
+            def user = crmSecurityService.currentUser
+            if (crmInvitation.receiver != user.email) {
+                log.warn("Invalid user [${user.email}] trying to accept invitation [${crmInvitation.id}] for [${crmInvitation.receiver}]")
+                response.sendError(HttpServletResponse.SC_FORBIDDEN)
+                return
+            }
+            crmInvitationService.accept(crmInvitation)
+            flash.success = message(code: "crmInvitation.accepted.message", default: "Invitation accepted")
         } else {
-            flash.error = message(code: 'default.not.found.message', args: [message(code: 'crmInvitation.label', default: 'Invitation'), params.id])
+            flash.error = message(code: 'default.not.found.message', args: [message(code: 'crmInvitation.label', default: 'Invitation'), id])
         }
         redirect(action: "index")
     }
@@ -45,12 +50,16 @@ class CrmInvitationController {
     def deny(Long id) {
         def crmInvitation = CrmInvitation.get(id)
         if (crmInvitation) {
-            crmInvitation.status = CrmInvitation.DENIED
-            crmInvitation.save()
-            publishEvent(new InvitationDeniedEvent(crmInvitation))
-            flash.warning = message(code:"crmInvitation.denied.message", default:"Invitation denied")
+            def user = crmSecurityService.currentUser
+            if (crmInvitation.receiver != user.email) {
+                log.warn("Invalid user [${user.email}] trying to deny invitation [${crmInvitation.id}] for [${crmInvitation.receiver}]")
+                response.sendError(HttpServletResponse.SC_FORBIDDEN)
+                return
+            }
+            crmInvitationService.deny(crmInvitation)
+            flash.warning = message(code: "crmInvitation.denied.message", default: "Invitation denied")
         } else {
-            flash.error = message(code: 'default.not.found.message', args: [message(code: 'crmInvitation.label', default: 'Invitation'), params.id])
+            flash.error = message(code: 'default.not.found.message', args: [message(code: 'crmInvitation.label', default: 'Invitation'), id])
         }
         redirect(action: "index")
     }

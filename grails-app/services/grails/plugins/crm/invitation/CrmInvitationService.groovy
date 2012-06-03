@@ -46,12 +46,15 @@ class CrmInvitationService {
         if (!receiverEmail) {
             throw new IllegalArgumentException("argument [receiverEmail] is mandatory")
         }
+        def tenant = binding?.tenantId ?: TenantUtils.tenant
         def ref = crmCoreService.getReferenceIdentifier(reference)
-        def i = new CrmInvitation(ref: ref, sender: senderUsername, receiver: receiverEmail, param:param).save(failOnError: true, flush: true)
+        def i = new CrmInvitation(tenantId: tenant, ref: ref, sender: senderUsername, receiver: receiverEmail, param: param).save(failOnError: true, flush: true)
 
         if (emailTemplate) {
             binding.invitation = i
-            sendInvitationEmail(i, emailTemplate, binding)
+            TenantUtils.withTenant(tenant) {
+                sendInvitationEmail(i, emailTemplate, binding)
+            }
         }
         return i
     }
@@ -64,7 +67,7 @@ class CrmInvitationService {
      * @return list of invitations for the object
      */
     List getInvitationsFor(reference, Long tenant = TenantUtils.tenant) {
-        CrmInvitation.createCriteria().list([sort:'dateCreated', order:'asc']) {
+        CrmInvitation.createCriteria().list([sort: 'dateCreated', order: 'asc']) {
             eq('tenantId', tenant)
             eq('ref', crmCoreService.getReferenceIdentifier(reference))
             inList('status', [CrmInvitation.CREATED, CrmInvitation.SENT])
@@ -78,9 +81,11 @@ class CrmInvitationService {
      * @param tenant optional tenant id
      * @return list of invitations sent to the user
      */
-    List getInvitationsTo(String email, Long tenant = TenantUtils.tenant) {
-        CrmInvitation.createCriteria().list([sort:'dateCreated', order:'asc']) {
-            eq('tenantId', tenant)
+    List getInvitationsTo(String email, Long tenant = null) {
+        CrmInvitation.createCriteria().list([sort: 'dateCreated', order: 'asc']) {
+            if (tenant) {
+                eq('tenantId', tenant)
+            }
             eq('receiver', email)
             inList('status', [CrmInvitation.CREATED, CrmInvitation.SENT])
         }
@@ -120,4 +125,23 @@ class CrmInvitationService {
         }
     }
 
+    /**
+     * Accept invitation.
+     * @param crmInvitation
+     */
+    void accept(CrmInvitation crmInvitation) {
+        crmInvitation.status = CrmInvitation.ACCEPTED
+        crmInvitation.save()
+        publishEvent(new InvitationAcceptedEvent(crmInvitation))
+    }
+
+    /**
+     * Deny invitation.
+     * @param crmInvitation
+     */
+    void deny(CrmInvitation crmInvitation) {
+        crmInvitation.status = CrmInvitation.DENIED
+        crmInvitation.save()
+        publishEvent(new InvitationDeniedEvent(crmInvitation))
+    }
 }

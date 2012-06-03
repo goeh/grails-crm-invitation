@@ -16,13 +16,13 @@
 
 class CrmInvitationGrailsPlugin {
     def groupId = "grails.crm"
-    def version = "0.9.3"
+    def version = "0.9.4.2"
     def grailsVersion = "2.0 > *"
     def dependsOn = [:]
     def pluginExcludes = [
         "grails-app/views/error.gsp"
     ]
-    def title = "Crm Invitation Plugin" // Headline display name of the plugin
+    def title = "Grails CRM Invitation Plugin" // Headline display name of the plugin
     def author = "Goran Ehrsson"
     def authorEmail = "goran@technipelago.se"
     def description = "User invitation for Grails CRM"
