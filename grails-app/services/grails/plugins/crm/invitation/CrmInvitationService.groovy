@@ -46,7 +46,7 @@ class CrmInvitationService {
         if (!receiverEmail) {
             throw new IllegalArgumentException("argument [receiverEmail] is mandatory")
         }
-        def tenant = binding?.tenantId ?: TenantUtils.tenant
+        def tenant = (binding?.tenantId ?: binding?.tenant) ?: TenantUtils.tenant
         def ref = crmCoreService.getReferenceIdentifier(reference)
         def i = new CrmInvitation(tenantId: tenant, ref: ref, sender: senderUsername, receiver: receiverEmail, param: param).save(failOnError: true, flush: true)
 

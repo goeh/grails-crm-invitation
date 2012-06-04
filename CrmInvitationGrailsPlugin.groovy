@@ -16,7 +16,7 @@
 
 class CrmInvitationGrailsPlugin {
     def groupId = "grails.crm"
-    def version = "0.9.4.2"
+    def version = "0.9.4.3"
     def grailsVersion = "2.0 > *"
     def dependsOn = [:]
     def pluginExcludes = [

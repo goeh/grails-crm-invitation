@@ -26,7 +26,7 @@ class CrmInvitationController {
 
     def index() {
         def user = crmSecurityService.currentUser
-        def invitations = crmInvitationService.getInvitationsTo(user.email, TenantUtils.tenant)
+        def invitations = crmInvitationService.getInvitationsTo(user.email)
         [user: user, invitations: invitations]
     }
 
