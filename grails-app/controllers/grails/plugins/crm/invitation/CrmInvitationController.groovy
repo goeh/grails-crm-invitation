@@ -27,7 +27,26 @@ class CrmInvitationController {
     def index() {
         def user = crmSecurityService.currentUser
         def invitations = crmInvitationService.getInvitationsTo(user.email)
-        [user: user, invitations: invitations]
+        def invited = crmInvitationService.getInvitationsBy(user.username, TenantUtils.tenant)
+        [user: user, invitations: invitations, invited:invited]
+    }
+
+    def cancel(Long id) {
+        def crmInvitation = CrmInvitation.get(id)
+        if (crmInvitation) {
+            def user = crmSecurityService.currentUser
+            if (crmInvitation.sender != user.username) {
+                log.warn("Invalid user [${user.username}] trying to cancel invitation [${crmInvitation.id}] for [${crmInvitation.receiver}]")
+                response.sendError(HttpServletResponse.SC_FORBIDDEN)
+                return
+            }
+            def label = crmInvitation.receiver
+            crmInvitationService.cancel(crmInvitation)
+            flash.warning = message(code: "crmInvitation.cancel.message", default: "Invitation to {0} cancelled", args:[label])
+        } else {
+            flash.error = message(code: 'default.not.found.message', args: [message(code: 'crmInvitation.label', default: 'Invitation'), id])
+        }
+        redirect(action: "index")
     }
 
     def accept(Long id) {

@@ -16,13 +16,13 @@
 
 class CrmInvitationGrailsPlugin {
     def groupId = "grails.crm"
-    def version = "0.9.4.3"
+    def version = "0.9.6"
     def grailsVersion = "2.0 > *"
     def dependsOn = [:]
     def pluginExcludes = [
         "grails-app/views/error.gsp"
     ]
-    def title = "Grails CRM Invitation Plugin" // Headline display name of the plugin
+    def title = "Grails CRM Invitation Plugin"
     def author = "Goran Ehrsson"
     def authorEmail = "goran@technipelago.se"
     def description = "User invitation for Grails CRM"
@@ -32,4 +32,15 @@ class CrmInvitationGrailsPlugin {
     def organization = [ name: "Technipelago AB", url: "http://www.technipelago.se/" ]
     def issueManagement = [ system: "github", url: "https://github.com/goeh/grails-crm-invitation/issues" ]
     def scm = [ url: "https://github.com/goeh/grails-crm-invitation" ]
+    def features = {
+        crmInvitation {
+            description "Share information with other users"
+            main controller: "crmInvitation", action: "index"
+            permissions {
+                read "crmInvitation:index,accept,deny"
+                update "crmInvitation:index,accept,deny,cancel"
+                admin "crmInvitation:*"
+            }
+        }
+    }
 }

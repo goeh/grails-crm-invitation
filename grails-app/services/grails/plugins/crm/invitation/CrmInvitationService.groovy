@@ -54,6 +54,8 @@ class CrmInvitationService {
             binding.invitation = i
             TenantUtils.withTenant(tenant) {
                 sendInvitationEmail(i, emailTemplate, binding)
+                i.status = CrmInvitation.SENT
+                i.save()
             }
         }
         return i
@@ -92,6 +94,23 @@ class CrmInvitationService {
     }
 
     /**
+     * List invitations done by a user.
+     *
+     * @param username user doing the invitation
+     * @param tenant optional tenant id
+     * @return list of invitations sent by the user
+     */
+    List getInvitationsBy(String username, Long tenant = null) {
+        CrmInvitation.createCriteria().list([sort: 'dateCreated', order: 'asc']) {
+            if (tenant) {
+                eq('tenantId', tenant)
+            }
+            eq('sender', username)
+            inList('status', [CrmInvitation.CREATED, CrmInvitation.SENT])
+        }
+    }
+
+    /**
      * Send invitation email to a user.
      *
      * @param invitation CrmInvitation instance
@@ -107,6 +126,9 @@ class CrmInvitationService {
         }
 
         sendMail {
+            if(bodyText && bodyHtml) {
+                multipart true
+            }
             from config.from ?: binding.user.email
             to invitation.receiver
             if (config.cc) {
@@ -143,5 +165,13 @@ class CrmInvitationService {
         crmInvitation.status = CrmInvitation.DENIED
         crmInvitation.save()
         publishEvent(new InvitationDeniedEvent(crmInvitation))
+    }
+
+    /**
+     * Cancel invitation.
+     * @param crmInvitation
+     */
+    void cancel(CrmInvitation crmInvitation) {
+        crmInvitation.delete()
     }
 }
