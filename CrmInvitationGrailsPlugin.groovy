@@ -35,7 +35,7 @@ class CrmInvitationGrailsPlugin {
     def features = {
         crmInvitation {
             description "Share information with other users"
-            main controller: "crmInvitation", action: "index"
+            link controller: "crmInvitation", action: "index"
             permissions {
                 read "crmInvitation:index,accept,deny"
                 update "crmInvitation:index,accept,deny,cancel"
