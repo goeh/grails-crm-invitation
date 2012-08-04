@@ -41,14 +41,14 @@ grails.project.dependency.resolution = {
             export = false
         }
 
-        test    ':spock:latest.integration'
-        test    ':greenmail:latest.integration'
-
+        compile ":platform-core:1.0.M2-SNAPSHOT"
         compile "grails.crm:crm-core:latest.integration"
+
+        test    ':spock:0.6'
+        test    ':greenmail:latest.integration'
 
         runtime ":mail:1.0"
         runtime ":text-template:latest.integration"
-        runtime ":spring-events:1.2.1"
     }
 }
 

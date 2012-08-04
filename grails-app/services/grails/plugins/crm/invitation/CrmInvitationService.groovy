@@ -126,7 +126,7 @@ class CrmInvitationService {
         }
 
         sendMail {
-            if(bodyText && bodyHtml) {
+            if (bodyText && bodyHtml) {
                 multipart true
             }
             from config.from ?: binding.user.email
@@ -154,7 +154,7 @@ class CrmInvitationService {
     void accept(CrmInvitation crmInvitation) {
         crmInvitation.status = CrmInvitation.ACCEPTED
         crmInvitation.save()
-        publishEvent(new InvitationAcceptedEvent(crmInvitation))
+        event(for: "crm", topic: "invitationAccepted", data: crmInvitation)
     }
 
     /**
@@ -164,7 +164,7 @@ class CrmInvitationService {
     void deny(CrmInvitation crmInvitation) {
         crmInvitation.status = CrmInvitation.DENIED
         crmInvitation.save()
-        publishEvent(new InvitationDeniedEvent(crmInvitation))
+        event(for: "crm", topic: "invitationDenied", data: crmInvitation)
     }
 
     /**
