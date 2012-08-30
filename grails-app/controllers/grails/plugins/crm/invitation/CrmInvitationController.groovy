@@ -21,14 +21,41 @@ import javax.servlet.http.HttpServletResponse
 
 class CrmInvitationController {
 
+    static navigation = [
+            [group: 'settings',
+                    order: 30,
+                    title: 'crmInvitation.index.label',
+                    action: 'index'
+            ]
+    ]
+
     def crmInvitationService
     def crmSecurityService
 
     def index() {
+        def tenant = crmSecurityService.getTenantInfo(TenantUtils.tenant)
         def user = crmSecurityService.currentUser
         def invitations = crmInvitationService.getInvitationsTo(user.email)
         def invited = crmInvitationService.getInvitationsBy(user.username, TenantUtils.tenant)
-        [user: user, invitations: invitations, invited:invited]
+        [tenant:tenant, user: user, invitations: invitations, invited:invited]
+    }
+
+    def share(Long id, String email, String msg, String role) {
+        def tenant = crmSecurityService.getTenantInfo(id)
+        if (!tenant) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND)
+            return
+        }
+
+        event(for: "crm", topic: "tenantShared", data: [id: id, email: email, role: role, message: msg, user: crmSecurityService.currentUser.username])
+
+        flash.success = message(code: 'crmInvitation.share.success.message', args: [tenant.name, email, msg])
+
+        if (params.referer) {
+            redirect(uri: params.referer - request.contextPath)
+        } else {
+            redirect(action: 'index', id: id, fragment: 'sent')
+        }
     }
 
     def cancel(Long id) {

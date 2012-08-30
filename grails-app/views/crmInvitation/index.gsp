@@ -25,10 +25,17 @@
                     <li><a href="#sent" data-toggle="tab"><g:message code="crmInvitation.tab.sent.label"/>
                         <crm:countIndicator count="${invited.size()}"/></a></li>
                 </g:if>
+                <g:if test="${tenant?.id}">
+                    <li>
+                        <a href="#share" data-toggle="tab"><g:message
+                                code="crmInvitation.tab.share.label"/>
+                        </a>
+                    </li>
+                </g:if>
                 <crm:pluginViews location="tabs" var="view">
                     <li>
                         <a href="#${view.id}" data-toggle="tab">
-                            ${message(code:view.label, default:view.label)}
+                            ${message(code: view.label, default: view.label)}
                         </a>
                     </li>
                 </crm:pluginViews>
@@ -105,6 +112,12 @@
                             </g:each>
                             </tbody>
                         </table>
+                    </div>
+                </g:if>
+
+                <g:if test="${tenant?.id}">
+                    <div class="tab-pane" id="share">
+                        <g:render template="share"/>
                     </div>
                 </g:if>
 
