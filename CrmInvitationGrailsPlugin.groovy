@@ -39,8 +39,8 @@ class CrmInvitationGrailsPlugin {
             description "Share information with other users"
             link controller: "crmInvitation", action: "index"
             permissions {
-                read "crmInvitation:index,accept,deny"
-                update "crmInvitation:index,accept,deny,cancel"
+                guest "crmInvitation:index,accept,deny"
+                user "crmInvitation:index,accept,deny,cancel"
                 admin "crmInvitation:*"
             }
             statistics {tenant ->
