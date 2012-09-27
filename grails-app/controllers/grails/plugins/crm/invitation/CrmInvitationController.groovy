@@ -21,14 +21,6 @@ import javax.servlet.http.HttpServletResponse
 
 class CrmInvitationController {
 
-    static navigation = [
-            [group: 'settings',
-                    order: 30,
-                    title: 'crmInvitation.index.label',
-                    action: 'index'
-            ]
-    ]
-
     def crmInvitationService
     def crmSecurityService
 
@@ -69,7 +61,7 @@ class CrmInvitationController {
             }
             def label = crmInvitation.receiver
             crmInvitationService.cancel(crmInvitation)
-            flash.warning = message(code: "crmInvitation.cancel.message", default: "Invitation to {0} cancelled", args:[label])
+            flash.warning = message(code: "crmInvitation.deleted.message", default: "Invitation to {0} cancelled", args:[label])
         } else {
             flash.error = message(code: 'default.not.found.message', args: [message(code: 'crmInvitation.label', default: 'Invitation'), id])
         }

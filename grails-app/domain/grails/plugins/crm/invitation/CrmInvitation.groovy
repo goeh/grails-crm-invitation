@@ -48,7 +48,7 @@ class CrmInvitation {
         status(inList: [CREATED, SENT, ACCEPTED, DENIED, EXPIRED])
     }
 
-    static transients = ['reference']
+    static transients = ['reference', 'dao']
 
     static namedQueries = {
         pending {
@@ -72,5 +72,9 @@ class CrmInvitation {
 
     String toString() {
         receiver
+    }
+
+    Map<String, Object> getDao() {
+        [tenantId: tenantId, id: id, guid: guid, ref: ref, param: param, sender: sender, receiver: receiver, dateCreated: dateCreated]
     }
 }

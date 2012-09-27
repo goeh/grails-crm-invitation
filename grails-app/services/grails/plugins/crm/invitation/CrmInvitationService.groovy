@@ -148,30 +148,61 @@ class CrmInvitationService {
     }
 
     /**
-     * Accept invitation.
-     * @param crmInvitation
+     * Get information about a specific invitation.
+     *
+     * @param id id of invitation
+     * @return Invitation properties (DAO) or null if no invitation exists with the specified id
      */
-    void accept(CrmInvitation crmInvitation) {
+    Map<String, Object> getInvitation(Long id) {
+        CrmInvitation.get(id)?.dao
+    }
+
+    /**
+     * Accept invitation.
+     *
+     * @param invitation CrmInvitation instance or Long invitation ID
+     */
+    void accept(invitation) {
+        def crmInvitation = parseInvitationArgument(invitation)
         crmInvitation.status = CrmInvitation.ACCEPTED
         crmInvitation.save()
-        event(for: "crm", topic: "invitationAccepted", data: crmInvitation)
+        event(for: "crm", topic: "invitationAccepted", data: crmInvitation.dao)
     }
 
     /**
      * Deny invitation.
-     * @param crmInvitation
+     *
+     * @param invitation CrmInvitation instance or Long invitation ID
      */
-    void deny(CrmInvitation crmInvitation) {
+    void deny(invitation) {
+        def crmInvitation = parseInvitationArgument(invitation)
         crmInvitation.status = CrmInvitation.DENIED
         crmInvitation.save()
-        event(for: "crm", topic: "invitationDenied", data: crmInvitation)
+        event(for: "crm", topic: "invitationDenied", data: crmInvitation.dao)
     }
 
     /**
      * Cancel invitation.
-     * @param crmInvitation
+     *
+     * @param invitation CrmInvitation instance or Long invitation ID
      */
-    void cancel(CrmInvitation crmInvitation) {
-        crmInvitation.delete()
+    void cancel(invitation) {
+        def crmInvitation = parseInvitationArgument(invitation)
+        def info = crmInvitation.dao
+        crmInvitation.delete(flush: true)
+        event(for: "crm", topic: "invitationCancelled", data: info)
+    }
+
+    private CrmInvitation parseInvitationArgument(Object arg) {
+        def invitation
+        if (arg instanceof CrmInvitation) {
+            invitation = arg
+        } else {
+            invitation = CrmInvitation.get(arg.toString())
+            if (!invitation) {
+                throw new IllegalArgumentException("CrmInvitation not found with id [$arg]")
+            }
+        }
+        return invitation
     }
 }
