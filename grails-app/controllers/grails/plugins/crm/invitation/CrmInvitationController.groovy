@@ -29,7 +29,7 @@ class CrmInvitationController {
         def user = crmSecurityService.currentUser
         def invitations = crmInvitationService.getInvitationsTo(user.email)
         def invited = crmInvitationService.getInvitationsBy(user.username, TenantUtils.tenant)
-        [tenant:tenant, user: user, invitations: invitations, invited:invited]
+        [tenant: tenant, user: user, invitations: invitations, invited: invited]
     }
 
     def share(Long id, String email, String msg, String role) {
@@ -59,9 +59,14 @@ class CrmInvitationController {
                 response.sendError(HttpServletResponse.SC_FORBIDDEN)
                 return
             }
+            if (!crmInvitation.active) {
+                log.warn("User [${user.email}] trying to cancel expired invitation [${crmInvitation.id}] for [${crmInvitation.receiver}]")
+                response.sendError(HttpServletResponse.SC_GONE)
+                return
+            }
             def label = crmInvitation.receiver
             crmInvitationService.cancel(crmInvitation)
-            flash.warning = message(code: "crmInvitation.deleted.message", default: "Invitation to {0} cancelled", args:[label])
+            flash.warning = message(code: "crmInvitation.deleted.message", default: "Invitation to {0} cancelled", args: [label])
         } else {
             flash.error = message(code: 'default.not.found.message', args: [message(code: 'crmInvitation.label', default: 'Invitation'), id])
         }
@@ -75,6 +80,11 @@ class CrmInvitationController {
             if (crmInvitation.receiver != user.email) {
                 log.warn("Invalid user [${user.email}] trying to accept invitation [${crmInvitation.id}] for [${crmInvitation.receiver}]")
                 response.sendError(HttpServletResponse.SC_FORBIDDEN)
+                return
+            }
+            if (!crmInvitation.active) {
+                log.warn("User [${user.email}] trying to accept expired invitation [${crmInvitation.id}] for [${crmInvitation.receiver}]")
+                response.sendError(HttpServletResponse.SC_GONE)
                 return
             }
             crmInvitationService.accept(crmInvitation)
@@ -92,6 +102,12 @@ class CrmInvitationController {
             if (crmInvitation.receiver != user.email) {
                 log.warn("Invalid user [${user.email}] trying to deny invitation [${crmInvitation.id}] for [${crmInvitation.receiver}]")
                 response.sendError(HttpServletResponse.SC_FORBIDDEN)
+                return
+            }
+
+            if (!crmInvitation.active) {
+                log.warn("User [${user.email}] trying to deny expired invitation [${crmInvitation.id}] for [${crmInvitation.receiver}]")
+                response.sendError(HttpServletResponse.SC_GONE)
                 return
             }
             crmInvitationService.deny(crmInvitation)

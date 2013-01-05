@@ -15,16 +15,16 @@ grails.project.dependency.resolution = {
     log "warn"
     repositories {
         grailsHome()
-        grailsCentral()
         mavenRepo "http://labs.technipelago.se/repo/crm-releases-local/"
         mavenRepo "http://labs.technipelago.se/repo/plugins-releases-local/"
+        grailsCentral()
     }
     dependencies {
     }
 
     plugins {
         build(":tomcat:$grailsVersion",
-                ":release:2.0.4") {
+                ":release:2.2.0") {
             export = false
         }
         runtime(":hibernate:$grailsVersion") {
@@ -33,7 +33,7 @@ grails.project.dependency.resolution = {
 
         test(":spock:0.7") { export = false }
         test(":greenmail:1.3.2") { export = false }
-        runtime ":mail:1.0"
+        runtime ":mail:1.0.1"
         compile(":platform-core:1.0.M6") { excludes 'resources' }
 
         compile "grails.crm:crm-core:latest.integration"

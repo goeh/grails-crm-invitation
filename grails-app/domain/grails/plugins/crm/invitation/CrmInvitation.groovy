@@ -48,7 +48,7 @@ class CrmInvitation {
         status(inList: [CREATED, SENT, ACCEPTED, DENIED, EXPIRED])
     }
 
-    static transients = ['reference', 'dao']
+    static transients = ['reference', 'dao', 'active']
 
     static namedQueries = {
         pending {
@@ -68,6 +68,10 @@ class CrmInvitation {
 
     transient Object getReference() {
         crmCoreService.getReference(ref)
+    }
+
+    transient boolean isActive() {
+        status == CREATED || status == SENT || status == ACCEPTED
     }
 
     String toString() {

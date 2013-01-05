@@ -68,11 +68,18 @@ class CrmInvitationService {
      * @param tenant optional tenant id
      * @return list of invitations for the object
      */
-    List getInvitationsFor(reference, Long tenant = TenantUtils.tenant) {
+    List getInvitationsFor(reference = null, Long tenant = TenantUtils.tenant, boolean includeHidden = false) {
+        def statuses = [CrmInvitation.CREATED, CrmInvitation.SENT]
+        if(includeHidden) {
+            statuses << CrmInvitation.EXPIRED
+            statuses << CrmInvitation.DENIED
+        }
         CrmInvitation.createCriteria().list([sort: 'dateCreated', order: 'asc']) {
             eq('tenantId', tenant)
-            eq('ref', crmCoreService.getReferenceIdentifier(reference))
-            inList('status', [CrmInvitation.CREATED, CrmInvitation.SENT])
+            if(reference) {
+                eq('ref', crmCoreService.getReferenceIdentifier(reference))
+            }
+            inList('status', statuses)
         }
     }
 
@@ -83,12 +90,16 @@ class CrmInvitationService {
      * @param tenant optional tenant id
      * @return list of invitations sent to the user
      */
-    List getInvitationsTo(String email, Long tenant = null) {
+    List getInvitationsTo(String email, Long tenant = null, Object reference = null) {
+        def ref = reference != null ? crmCoreService.getReferenceIdentifier(reference) : null
         CrmInvitation.createCriteria().list([sort: 'dateCreated', order: 'asc']) {
             if (tenant) {
                 eq('tenantId', tenant)
             }
-            eq('receiver', email)
+            if(ref) {
+                eq('ref', ref)
+            }
+            ilike('receiver', email)
             inList('status', [CrmInvitation.CREATED, CrmInvitation.SENT])
         }
     }
@@ -119,6 +130,11 @@ class CrmInvitationService {
      */
     void sendInvitationEmail(CrmInvitation invitation, String template, Map binding = [:]) {
         def config = grailsApplication.config.crm.invitation.email
+        // Create a globally unique CID for the inline logo image.
+        def ctx = grailsApplication.mainContext
+        def logo = ctx.getResource(grailsApplication.config.crm.theme.logo.large)?.getFile()
+        binding.logo = "logo.invitation.${System.currentTimeMillis()}@email".toString()
+
         def bodyText = textTemplateService.applyTemplate(template, "text/plain", binding)
         def bodyHtml = textTemplateService.applyTemplate(template, "text/html", binding)
         if (!(bodyText || bodyHtml)) {
@@ -126,7 +142,7 @@ class CrmInvitationService {
         }
 
         sendMail {
-            if (bodyText && bodyHtml) {
+            if (logo || (bodyText && bodyHtml)) {
                 multipart true
             }
             from config.from ?: binding.user.email
@@ -143,6 +159,9 @@ class CrmInvitationService {
             }
             if (bodyHtml) {
                 html bodyHtml
+            }
+            if (logo) {
+                inline binding.logo, 'image/png', logo
             }
         }
     }
@@ -166,7 +185,7 @@ class CrmInvitationService {
         def crmInvitation = parseInvitationArgument(invitation)
         crmInvitation.status = CrmInvitation.ACCEPTED
         crmInvitation.save()
-        event(for: "crm", topic: "invitationAccepted", data: crmInvitation.dao)
+        event(for: "crmInvitation", topic: "accepted", data: crmInvitation.dao)
     }
 
     /**
@@ -178,7 +197,7 @@ class CrmInvitationService {
         def crmInvitation = parseInvitationArgument(invitation)
         crmInvitation.status = CrmInvitation.DENIED
         crmInvitation.save()
-        event(for: "crm", topic: "invitationDenied", data: crmInvitation.dao)
+        event(for: "crmInvitation", topic: "denied", data: crmInvitation.dao)
     }
 
     /**
@@ -190,7 +209,7 @@ class CrmInvitationService {
         def crmInvitation = parseInvitationArgument(invitation)
         def info = crmInvitation.dao
         crmInvitation.delete(flush: true)
-        event(for: "crm", topic: "invitationCancelled", data: info)
+        event(for: "crmInvitation", topic: "deleted", data: info)
     }
 
     private CrmInvitation parseInvitationArgument(Object arg) {
@@ -204,5 +223,18 @@ class CrmInvitationService {
             }
         }
         return invitation
+    }
+
+    def updateExpiredInvitations() {
+        def ttl = grailsApplication.config.crm.invitation.expires ?: 30
+        def result = CrmInvitation.createCriteria().list() {
+            lt('dateCreated', new Date() - ttl)
+            inList('status', [CrmInvitation.CREATED, CrmInvitation.SENT])
+        }
+        for(i in result) {
+            log.debug("Expiring invitation: ${i.sender} -> ${i.receiver}")
+            i.status = CrmInvitation.EXPIRED
+            i.save()
+        }
     }
 }
