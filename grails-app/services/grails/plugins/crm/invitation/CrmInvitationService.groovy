@@ -16,6 +16,7 @@
 
 package grails.plugins.crm.invitation
 
+import grails.events.Listener
 import grails.plugins.crm.core.TenantUtils
 
 /**
@@ -28,6 +29,21 @@ class CrmInvitationService {
     def grailsApplication
     def crmCoreService
     def textTemplateService
+
+    @Listener(namespace = "crmTenant", topic = "requestDelete")
+    def requestDeleteTenant(event) {
+        def tenant = event.id
+        def count = CrmInvitation.countByTenantId(tenant)
+        return count ? [namespace: "crmInvitation", topic: "deleteTenant"] : null
+    }
+
+    @Listener(namespace = "crmInvitation", topic = "deleteTenant")
+    def deleteTenant(event) {
+        def tenant = event.id
+        def result = CrmInvitation.findAllByTenantId(tenant)
+        result*.delete()
+        log.warn("Deleted ${result.size()} invitations in tenant $tenant")
+    }
 
     /**
      * Create new invitation.
@@ -70,13 +86,13 @@ class CrmInvitationService {
      */
     List getInvitationsFor(reference = null, Long tenant = TenantUtils.tenant, boolean includeHidden = false) {
         def statuses = [CrmInvitation.CREATED, CrmInvitation.SENT]
-        if(includeHidden) {
+        if (includeHidden) {
             statuses << CrmInvitation.EXPIRED
             statuses << CrmInvitation.DENIED
         }
         CrmInvitation.createCriteria().list([sort: 'dateCreated', order: 'asc']) {
             eq('tenantId', tenant)
-            if(reference) {
+            if (reference) {
                 eq('ref', crmCoreService.getReferenceIdentifier(reference))
             }
             inList('status', statuses)
@@ -96,7 +112,7 @@ class CrmInvitationService {
             if (tenant) {
                 eq('tenantId', tenant)
             }
-            if(ref) {
+            if (ref) {
                 eq('ref', ref)
             }
             ilike('receiver', email)
@@ -231,7 +247,7 @@ class CrmInvitationService {
             lt('dateCreated', new Date() - ttl)
             inList('status', [CrmInvitation.CREATED, CrmInvitation.SENT])
         }
-        for(i in result) {
+        for (i in result) {
             log.debug("Expiring invitation: ${i.sender} -> ${i.receiver}")
             i.status = CrmInvitation.EXPIRED
             i.save()
