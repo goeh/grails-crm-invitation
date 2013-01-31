@@ -32,9 +32,9 @@ grails.project.dependency.resolution = {
         }
 
         test(":spock:0.7") { export = false }
-        test(":greenmail:1.3.2") { export = false }
+        test(":greenmail:1.3.4") { export = false }
         runtime ":mail:1.0.1"
-        compile(":platform-core:1.0.M6") { excludes 'resources' }
+        compile(":platform-core:1.0.RC5") { excludes 'resources' }
 
         compile "grails.crm:crm-core:latest.integration"
 
