@@ -148,8 +148,11 @@ class CrmInvitationService {
         def config = grailsApplication.config.crm.invitation.email
         // Create a globally unique CID for the inline logo image.
         def ctx = grailsApplication.mainContext
-        def logo = ctx.getResource(grailsApplication.config.crm.theme.logo.large)?.getFile()
-        binding.logo = "logo.invitation.${System.currentTimeMillis()}@email".toString()
+        def logoURL = grailsApplication.config.crm.theme.logo.large
+        def logo = logoURL ? ctx.getResource(logoURL)?.getFile() : null
+        if(logo) {
+            binding.logo = "logo.invitation.${System.currentTimeMillis()}@email".toString()
+        }
 
         def bodyText = textTemplateService.applyTemplate(template, "text/plain", binding)
         def bodyHtml = textTemplateService.applyTemplate(template, "text/html", binding)
@@ -201,7 +204,7 @@ class CrmInvitationService {
         def crmInvitation = parseInvitationArgument(invitation)
         crmInvitation.status = CrmInvitation.ACCEPTED
         crmInvitation.save()
-        event(for: "crmInvitation", topic: "accepted", data: crmInvitation.dao)
+        event(for: "crmInvitation", topic: "accepted", data: crmInvitation.dao, fork: false)
     }
 
     /**
@@ -213,7 +216,7 @@ class CrmInvitationService {
         def crmInvitation = parseInvitationArgument(invitation)
         crmInvitation.status = CrmInvitation.DENIED
         crmInvitation.save()
-        event(for: "crmInvitation", topic: "denied", data: crmInvitation.dao)
+        event(for: "crmInvitation", topic: "denied", data: crmInvitation.dao, fork: false)
     }
 
     /**
@@ -225,7 +228,7 @@ class CrmInvitationService {
         def crmInvitation = parseInvitationArgument(invitation)
         def info = crmInvitation.dao
         crmInvitation.delete(flush: true)
-        event(for: "crmInvitation", topic: "deleted", data: info)
+        event(for: "crmInvitation", topic: "deleted", data: info, fork: false)
     }
 
     private CrmInvitation parseInvitationArgument(Object arg) {

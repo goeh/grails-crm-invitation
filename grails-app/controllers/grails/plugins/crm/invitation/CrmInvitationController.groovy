@@ -88,11 +88,19 @@ class CrmInvitationController {
                 return
             }
             crmInvitationService.accept(crmInvitation)
+
+            def oldTenant = TenantUtils.getTenant()
+            def newTenant = crmInvitation.tenantId
+            TenantUtils.setTenant(newTenant)
+            request.session.tenant = newTenant
+            event(for: "crm", topic: "tenantChanged", data: [newTenant: newTenant, oldTenant: oldTenant, request: request])
+
             flash.success = message(code: "crmInvitation.accepted.message", default: "Invitation accepted")
+            redirect(mapping: "home")
         } else {
             flash.error = message(code: 'default.not.found.message', args: [message(code: 'crmInvitation.label', default: 'Invitation'), id])
+            redirect(action: "index")
         }
-        redirect(action: "index")
     }
 
     def deny(Long id) {

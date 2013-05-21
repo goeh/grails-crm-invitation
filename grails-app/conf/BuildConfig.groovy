@@ -7,6 +7,8 @@ grails.project.target.level = 1.6
 grails.project.repos.default = "crm"
 
 grails.project.dependency.resolution = {
+    def environment = System.getProperty('grails.env')
+
     // inherit Grails' default dependencies
     inherits("global") {
         // uncomment to disable ehcache
@@ -24,7 +26,7 @@ grails.project.dependency.resolution = {
 
     plugins {
         build(":tomcat:$grailsVersion",
-                ":release:2.2.0") {
+                ":release:2.2.1") {
             export = false
         }
         runtime(":hibernate:$grailsVersion") {
@@ -32,8 +34,12 @@ grails.project.dependency.resolution = {
         }
 
         test(":spock:0.7") { export = false }
-        test(":greenmail:1.3.4") { export = false }
+        if (environment != 'production') {
+            test(":greenmail:1.3.4") { export = false }
+        }
+
         runtime ":mail:1.0.1"
+
         compile(":platform-core:1.0.RC5") { excludes 'resources' }
 
         compile "grails.crm:crm-core:latest.integration"
