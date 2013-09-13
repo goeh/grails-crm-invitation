@@ -1,7 +1,7 @@
 import grails.plugins.crm.invitation.CrmInvitation
 
 /*
-* Copyright (c) 2012 Goran Ehrsson.
+* Copyright (c) 2013 Goran Ehrsson.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -18,11 +18,12 @@ import grails.plugins.crm.invitation.CrmInvitation
 
 class CrmInvitationGrailsPlugin {
     def groupId = "grails.crm"
-    def version = "1.0.5"
-    def grailsVersion = "2.0 > *"
+    def version = "1.2.0"
+    def grailsVersion = "2.2 > *"
     def dependsOn = [:]
+    def loadAfter = ['crmCore']
     def pluginExcludes = [
-        "grails-app/views/error.gsp"
+            "grails-app/views/error.gsp"
     ]
     def title = "Grails CRM Invitation Plugin"
     def author = "Goran Ehrsson"
@@ -31,21 +32,23 @@ class CrmInvitationGrailsPlugin {
     def documentation = "http://grails.org/plugin/crm-invitation"
 
     def license = "APACHE"
-    def organization = [ name: "Technipelago AB", url: "http://www.technipelago.se/" ]
-    def issueManagement = [ system: "github", url: "https://github.com/goeh/grails-crm-invitation/issues" ]
-    def scm = [ url: "https://github.com/goeh/grails-crm-invitation" ]
+    def organization = [name: "Technipelago AB", url: "http://www.technipelago.se/"]
+    def issueManagement = [system: "github", url: "https://github.com/goeh/grails-crm-invitation/issues"]
+    def scm = [url: "https://github.com/goeh/grails-crm-invitation"]
+
     def features = {
         crmInvitation {
             description "Share information with other users"
             link controller: "crmInvitation", action: "index"
             permissions {
                 guest "crmInvitation:index,accept,deny"
+                partner "crmInvitation:index,accept,deny"
                 user "crmInvitation:index,accept,deny,cancel"
                 admin "crmInvitation:*"
             }
-            statistics {tenant ->
+            statistics { tenant ->
                 def total = CrmInvitation.countByTenantId(tenant)
-                def updated = CrmInvitation.countByTenantIdAndDateCreatedGreaterThan(tenant, new Date() -31)
+                def updated = CrmInvitation.countByTenantIdAndDateCreatedGreaterThan(tenant, new Date() - 31)
                 def usage
                 if (total > 0) {
                     def tmp = updated / total
