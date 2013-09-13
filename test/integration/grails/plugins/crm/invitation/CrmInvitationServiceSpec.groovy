@@ -17,46 +17,9 @@
 
 package grails.plugins.crm.invitation
 
-import com.icegreen.greenmail.util.*
-
 class CrmInvitationServiceSpec extends grails.plugin.spock.IntegrationSpec {
 
-    def grailsApplication
     def crmInvitationService
-    def textTemplateService
-    def greenMail
-
-    def setup() {
-        grailsApplication.config.crm.invitation.email.from = "test@test.it"
-        grailsApplication.config.crm.invitation.email.subject = "Invitation"
-    }
-
-    def cleanup() {
-        greenMail.deleteAllMessages()
-    }
-
-    def "invite"() {
-
-        given:
-        textTemplateService.createContent("invitation-email", "text/html", """
-        <p>Hi, this is an invitation from <strong>\${invitation.sender.encodeAsHTML()}</strong>.</p>
-        <p>\${message}</p>
-        """)
-        when:
-        crmInvitationService.createInvitation("test", null, "grails", "joe@acme.com", "invitation-email", [message: "Hello World"])
-
-        then:
-        greenMail.getReceivedMessages().length == 1
-
-        when:
-        def message = greenMail.getReceivedMessages()[0]
-
-        then:
-        GreenMailUtil.getBody(message).contains('<strong>grails</strong>')
-        GreenMailUtil.getBody(message).contains('<p>Hello World</p>')
-        GreenMailUtil.getAddressList(message.from) == 'test@test.it'
-        message.subject == 'Invitation'
-    }
 
     def "list invitation for an object"() {
         when:

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Goran Ehrsson.
+ * Copyright (c) 2013 Goran Ehrsson.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ class CrmInvitationService {
 
     def grailsApplication
     def crmCoreService
-    def textTemplateService
 
     @Listener(namespace = "crmTenant", topic = "requestDelete")
     def requestDeleteTenant(event) {
@@ -48,32 +47,34 @@ class CrmInvitationService {
     /**
      * Create new invitation.
      *
-     * @param reference reference identifier for invited resource
+     * @param target domain instance or reference identifier that is target for the invitation
+     * @param application specific type of invitation (ex. role name to give the user when invitation is accepted)
      * @param senderUsername inviting user
      * @param receiverEmail invited user
-     * @param emailTemplate text template name for invitation email
-     * @param binding template binding
+     * @param binding application specific data
      * @return The created CrmInvitation instance
      */
-    def createInvitation(Object reference, String param, String senderUsername, String receiverEmail, String emailTemplate = null, Map binding = null) {
+    CrmInvitation createInvitation(Object target, String param, String senderUsername, String receiverEmail, Map binding = [:]) {
         if (!senderUsername) {
             throw new IllegalArgumentException("argument [senderUsername] is mandatory")
         }
         if (!receiverEmail) {
             throw new IllegalArgumentException("argument [receiverEmail] is mandatory")
         }
-        def tenant = (binding?.tenantId ?: binding?.tenant) ?: TenantUtils.tenant
-        def ref = crmCoreService.getReferenceIdentifier(reference)
+        def tenant = (binding.tenantId ?: binding.tenant) ?: TenantUtils.tenant
+        def ref = crmCoreService.getReferenceIdentifier(target)
         def i = new CrmInvitation(tenantId: tenant, ref: ref, sender: senderUsername, receiver: receiverEmail, param: param).save(failOnError: true, flush: true)
 
-        if (emailTemplate) {
-            binding.invitation = i
-            TenantUtils.withTenant(tenant) {
-                sendInvitationEmail(i, emailTemplate, binding)
-                i.status = CrmInvitation.SENT
-                i.save()
-            }
-        }
+        binding.tenant = tenant
+        binding.id = i.id
+        binding.username = senderUsername
+        binding.email = receiverEmail
+        binding.target = target
+        binding.ref = ref
+        binding.param = param
+
+        event(for: "crmInvitation", topic: "created", data: binding)
+
         return i
     }
 
@@ -96,6 +97,7 @@ class CrmInvitationService {
                 eq('ref', crmCoreService.getReferenceIdentifier(reference))
             }
             inList('status', statuses)
+            cache true
         }
     }
 
@@ -117,6 +119,7 @@ class CrmInvitationService {
             }
             ilike('receiver', email)
             inList('status', [CrmInvitation.CREATED, CrmInvitation.SENT])
+            cache true
         }
     }
 
@@ -134,54 +137,7 @@ class CrmInvitationService {
             }
             eq('sender', username)
             inList('status', [CrmInvitation.CREATED, CrmInvitation.SENT])
-        }
-    }
-
-    /**
-     * Send invitation email to a user.
-     *
-     * @param invitation CrmInvitation instance
-     * @param template email template
-     * @param binding template binding
-     */
-    void sendInvitationEmail(CrmInvitation invitation, String template, Map binding = [:]) {
-        def config = grailsApplication.config.crm.invitation.email
-        // Create a globally unique CID for the inline logo image.
-        def ctx = grailsApplication.mainContext
-        def logoURL = grailsApplication.config.crm.theme.logo.large
-        def logo = logoURL ? ctx.getResource(logoURL)?.getFile() : null
-        if(logo) {
-            binding.logo = "logo.invitation.${System.currentTimeMillis()}@email".toString()
-        }
-
-        def bodyText = textTemplateService.applyTemplate(template, "text/plain", binding)
-        def bodyHtml = textTemplateService.applyTemplate(template, "text/html", binding)
-        if (!(bodyText || bodyHtml)) {
-            throw new RuntimeException("Template not found: [name=${template}]")
-        }
-
-        sendMail {
-            if (logo || (bodyText && bodyHtml)) {
-                multipart true
-            }
-            from config.from ?: binding.user.email
-            to invitation.receiver
-            if (config.cc) {
-                cc config.cc
-            }
-            if (config.bcc) {
-                bcc config.bcc
-            }
-            subject config.subject
-            if (bodyText) {
-                text bodyText
-            }
-            if (bodyHtml) {
-                html bodyHtml
-            }
-            if (logo) {
-                inline binding.logo, 'image/png', logo
-            }
+            cache true
         }
     }
 
@@ -244,7 +200,7 @@ class CrmInvitationService {
         return invitation
     }
 
-    def updateExpiredInvitations() {
+    void updateExpiredInvitations() {
         def ttl = grailsApplication.config.crm.invitation.expires ?: 30
         def result = CrmInvitation.createCriteria().list() {
             lt('dateCreated', new Date() - ttl)
