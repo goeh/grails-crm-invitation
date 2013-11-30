@@ -1,8 +1,8 @@
-# Grails CRM
+# GR8 CRM
 
 CRM = [Customer Relationship Management](http://en.wikipedia.org/wiki/Customer_relationship_management)
 
-Grails CRM is a set of [Grails Web Application Framework](http://www.grails.org/)
+GR8 CRM is a set of [Grails Web Application Framework](http://www.grails.org/)
 plugins that makes it easy to develop web application with CRM functionality.
 With CRM we mean features like:
 
@@ -10,9 +10,9 @@ With CRM we mean features like:
 - Task/Todo Lists
 - Project Management
 
-# Grails CRM - Invitation Plugin
+# GR8 CRM - Invitation Plugin
 
-Grails CRM users can share information with other users. This plugin manages user invitations.
+GR8 CRM users can share information with other users. This plugin manages user invitations.
 An invitation is created by calling `crmInvitationService.createInvitation(...)`.
 This triggers an event `crmInvitation#created`.
 The application must subscribe to this event and probably wants to send an invitation email to the invited user.
