@@ -1,5 +1,3 @@
-import grails.plugins.crm.invitation.CrmInvitation
-
 /*
 * Copyright (c) 2013 Goran Ehrsson.
 *
@@ -15,7 +13,11 @@ import grails.plugins.crm.invitation.CrmInvitation
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
+import grails.plugins.crm.invitation.CrmInvitation
 
+/**
+ * GR8 CRM Invitation Plugin.
+ */
 class CrmInvitationGrailsPlugin {
     def groupId = "grails.crm"
     def version = "1.2.0"
@@ -25,12 +27,11 @@ class CrmInvitationGrailsPlugin {
     def pluginExcludes = [
             "grails-app/views/error.gsp"
     ]
-    def title = "Grails CRM Invitation Plugin"
+    def title = "GR8 CRM Invitation Plugin"
     def author = "Goran Ehrsson"
     def authorEmail = "goran@technipelago.se"
-    def description = "User invitation for Grails CRM"
+    def description = "User invitation for GR8 CRM"
     def documentation = "http://grails.org/plugin/crm-invitation"
-
     def license = "APACHE"
     def organization = [name: "Technipelago AB", url: "http://www.technipelago.se/"]
     def issueManagement = [system: "github", url: "https://github.com/goeh/grails-crm-invitation/issues"]
