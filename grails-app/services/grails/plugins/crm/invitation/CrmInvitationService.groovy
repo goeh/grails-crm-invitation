@@ -39,9 +39,24 @@ class CrmInvitationService {
     @Listener(namespace = "crmInvitation", topic = "deleteTenant")
     def deleteTenant(event) {
         def tenant = event.id
+        def count = deleteAllInvitations(tenant)
+        log.warn("Deleted $count invitations in tenant $tenant")
+    }
+
+    @Listener(namespace = "crm", topic = "accountClosed")
+    def accountClosed(event) {
+        for(t in event.tenants) {
+            deleteAllInvitations(t.id)
+        }
+    }
+
+    int deleteAllInvitations(Long tenant) {
         def result = CrmInvitation.findAllByTenantId(tenant)
-        result*.delete()
-        log.warn("Deleted ${result.size()} invitations in tenant $tenant")
+        def count = result.size()
+        if(count) {
+            result*.delete()
+        }
+        return count
     }
 
     /**
