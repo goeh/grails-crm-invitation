@@ -87,7 +87,15 @@ class CrmInvitationController {
                 response.sendError(HttpServletResponse.SC_GONE)
                 return
             }
-            crmInvitationService.accept(crmInvitation)
+
+            try {
+                crmInvitationService.accept(crmInvitation)
+            } catch(Exception e) {
+                log.error("Failed to accept invitation [${crmInvitation.id}] for [${crmInvitation.receiver}]", e)
+                flash.error = message(code: 'invitation.accept.error')
+                redirect mapping: "home"
+                return
+            }
 
             def oldTenant = TenantUtils.getTenant()
             def newTenant = crmInvitation.tenantId
@@ -118,7 +126,16 @@ class CrmInvitationController {
                 response.sendError(HttpServletResponse.SC_GONE)
                 return
             }
-            crmInvitationService.deny(crmInvitation)
+
+            try {
+                crmInvitationService.deny(crmInvitation)
+            } catch(Exception e) {
+                log.error("Failed to deny invitation [${crmInvitation.id}] for [${crmInvitation.receiver}]", e)
+                flash.error = message(code: 'invitation.deny.error')
+                redirect mapping: "home"
+                return
+            }
+
             flash.warning = message(code: "crmInvitation.denied.message", default: "Invitation denied")
         } else {
             flash.error = message(code: 'default.not.found.message', args: [message(code: 'crmInvitation.label', default: 'Invitation'), id])
