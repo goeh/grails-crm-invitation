@@ -28,15 +28,19 @@
                                                         default="Permission"/></label>
 
                 <div class="controls">
-                    <crm:isAllowedMoreInvitations role="guest">
+                    <crm:isAllowedMoreInvitations role="guest" account="${account}">
                         <label class="radio inline"><g:radio value="guest" name="role"/><g:message
                                 code="crmRole.role.guest.label" default="Read"/></label>
                     </crm:isAllowedMoreInvitations>
-                    <crm:isAllowedMoreInvitations role="user">
+                    <crm:isAllowedMoreInvitations role="partner" account="${account}">
+                        <label class="radio inline"><g:radio value="partner" name="role"/><g:message
+                                code="crmRole.role.partner.label" default="Comment"/></label>
+                    </crm:isAllowedMoreInvitations>
+                    <crm:isAllowedMoreInvitations role="user" account="${account}">
                         <label class="radio inline"><g:radio value="user" name="role"/><g:message
                                 code="crmRole.role.user.label" default="Edit"/></label>
                     </crm:isAllowedMoreInvitations>
-                    <crm:isAllowedMoreInvitations role="admin">
+                    <crm:isAllowedMoreInvitations role="admin" account="${account}">
                         <label class="radio inline"><g:radio value="admin" name="role"/><g:message
                                 code="crmRole.role.admin.label" default="Admin"/></label>
                     </crm:isAllowedMoreInvitations>
