@@ -20,7 +20,7 @@ import grails.plugins.crm.invitation.CrmInvitation
  */
 class CrmInvitationGrailsPlugin {
     def groupId = "grails.crm"
-    def version = "1.2.2"
+    def version = "1.3.0"
     def grailsVersion = "2.2 > *"
     def dependsOn = [:]
     def loadAfter = ['crmCore']
@@ -30,7 +30,7 @@ class CrmInvitationGrailsPlugin {
     def title = "GR8 CRM Invitation Plugin"
     def author = "Goran Ehrsson"
     def authorEmail = "goran@technipelago.se"
-    def description = "User invitation for GR8 CRM"
+    def description = "Invite users to GR8 CRM applications"
     def documentation = "http://grails.org/plugin/crm-invitation"
     def license = "APACHE"
     def organization = [name: "Technipelago AB", url: "http://www.technipelago.se/"]
@@ -39,7 +39,7 @@ class CrmInvitationGrailsPlugin {
 
     def features = {
         crmInvitation {
-            description "Share information with other users"
+            description "Invite users to shared information"
             link controller: "crmInvitation", action: "index"
             permissions {
                 guest "crmInvitation:index,accept,deny"
