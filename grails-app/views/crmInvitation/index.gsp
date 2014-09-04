@@ -21,24 +21,9 @@
                 <div class="well">
                     <g:form>
                         <input type="hidden" name="id" value="${invitation.id}"/>
-                        <tt:html name="crmInvitation-index-main"
-                                 model="${[invitation: invitation, reference: reference]}">
-                            <crm:user username="${invitation.sender}">
-                                <h3>${(name ?: invitation.sender).encodeAsHTML()}
-                                    <small><g:formatDate type="date"
-                                                         date="${invitation.dateCreated}"/></small>
-                                </h3>
-                                <h4>${reference.encodeAsHTML()}</h4>
 
-                                <p>
-                                    ${(name ?: invitation.sender).encodeAsHTML()} &lt;${email?.encodeAsHTML()}&gt; bjuder in dig till
-                                    <g:message code="app.name" default="denna tjänst"/>.
-                                    Genom att acceptera denna inbjudan får du inte bara tillgång till en bra tjänst för ditt eget bruk.
-                                    Du får dessutom behörighet att ta del av &quot;${reference.encodeAsHTML()}&quot;
-                                    som hanteras av ${(name ?: invitation.sender).encodeAsHTML()}.
-                                </p>
-                            </crm:user>
-                        </tt:html>
+                        <tmpl:content invitation="${invitation}" reference="${reference}"/>
+
                         <button type="submit" name="_action_accept" class="btn btn-primary"><i
                                 class="icon-ok icon-white"></i>
                             <g:message code="crmInvitation.button.accept.label" default="Accept"/></button>
@@ -57,7 +42,6 @@
 
     <div class="span3">
         <crm:submenu/>
-        <tt:html name="crmInvitation-index-right"></tt:html>
     </div>
 </div>
 
