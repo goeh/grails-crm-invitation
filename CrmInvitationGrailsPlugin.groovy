@@ -20,7 +20,7 @@ import grails.plugins.crm.invitation.CrmInvitation
  */
 class CrmInvitationGrailsPlugin {
     def groupId = "grails.crm"
-    def version = "1.3.0"
+    def version = "1.3.1"
     def grailsVersion = "2.2 > *"
     def dependsOn = [:]
     def loadAfter = ['crmCore']
