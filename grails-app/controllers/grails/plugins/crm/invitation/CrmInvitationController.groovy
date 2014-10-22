@@ -33,13 +33,26 @@ class CrmInvitationController {
     }
 
     def share(Long id, String email, String msg, String role) {
+        def currentUser = crmSecurityService.currentUser
+        if (!currentUser) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED)
+            return
+        }
+
+        // User must have "admin" role to share a tenant.
+        if (!crmSecurityService.hasRole("admin", id, currentUser.username)) {
+            log.warn "User [${currentUser.username}] is not allowed to share tenant [$id]"
+            response.sendError(HttpServletResponse.SC_FORBIDDEN)
+            return
+        }
+
         def tenant = crmSecurityService.getTenantInfo(id)
         if (!tenant) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND)
             return
         }
 
-        event(for: "crm", topic: "tenantShared", data: [id: id, email: email, role: role, message: msg, user: crmSecurityService.currentUser.username])
+        event(for: "crm", topic: "tenantShared", data: [id: id, email: email, role: role, message: msg, user: currentUser.username])
 
         flash.success = message(code: 'crmInvitation.share.success.message', args: [tenant.name, email, msg])
 
@@ -50,11 +63,17 @@ class CrmInvitationController {
         }
     }
 
+    /**
+     * The sender can cancel (revoke) a sent invitation.
+     *
+     * @param id invitation id
+     * @return
+     */
     def cancel(Long id) {
         def crmInvitation = CrmInvitation.get(id)
         if (crmInvitation) {
             def user = crmSecurityService.currentUser
-            if (crmInvitation.sender != user.username) {
+            if (!crmInvitation.sender.equalsIgnoreCase(user.username)) {
                 log.warn("Invalid user [${user.username}] trying to cancel invitation [${crmInvitation.id}] for [${crmInvitation.receiver}]")
                 response.sendError(HttpServletResponse.SC_FORBIDDEN)
                 return
@@ -73,11 +92,17 @@ class CrmInvitationController {
         redirect(action: "index")
     }
 
+    /**
+     * An invited person can accept an invitation.
+     *
+     * @param id invitation id
+     * @return
+     */
     def accept(Long id) {
         def crmInvitation = CrmInvitation.get(id)
         if (crmInvitation) {
             def user = crmSecurityService.currentUser
-            if (crmInvitation.receiver != user.email) {
+            if (!crmInvitation.receiver.equalsIgnoreCase(user.email)) {
                 log.warn("Invalid user [${user.email}] trying to accept invitation [${crmInvitation.id}] for [${crmInvitation.receiver}]")
                 response.sendError(HttpServletResponse.SC_FORBIDDEN)
                 return
@@ -90,7 +115,7 @@ class CrmInvitationController {
 
             try {
                 crmInvitationService.accept(crmInvitation)
-            } catch(Exception e) {
+            } catch (Exception e) {
                 log.error("Failed to accept invitation [${crmInvitation.id}] for [${crmInvitation.receiver}]", e)
                 flash.error = message(code: 'invitation.accept.error')
                 redirect mapping: "home"
@@ -111,11 +136,17 @@ class CrmInvitationController {
         }
     }
 
+    /**
+     * An invited person can deny an invitation.
+     *
+     * @param id invitation id
+     * @return
+     */
     def deny(Long id) {
         def crmInvitation = CrmInvitation.get(id)
         if (crmInvitation) {
             def user = crmSecurityService.currentUser
-            if (crmInvitation.receiver != user.email) {
+            if (!crmInvitation.receiver.equalsIgnoreCase(user.email)) {
                 log.warn("Invalid user [${user.email}] trying to deny invitation [${crmInvitation.id}] for [${crmInvitation.receiver}]")
                 response.sendError(HttpServletResponse.SC_FORBIDDEN)
                 return
@@ -129,7 +160,7 @@ class CrmInvitationController {
 
             try {
                 crmInvitationService.deny(crmInvitation)
-            } catch(Exception e) {
+            } catch (Exception e) {
                 log.error("Failed to deny invitation [${crmInvitation.id}] for [${crmInvitation.receiver}]", e)
                 flash.error = message(code: 'invitation.deny.error')
                 redirect mapping: "home"
