@@ -202,12 +202,23 @@ class CrmInvitationService {
         event(for: "crmInvitation", topic: "deleted", data: info, fork: false)
     }
 
+    /**
+     * Set invitation status to sent.
+     *
+     * @param invitation CrmInvitation instance or Long invitation ID
+     */
+    void sent(invitation) {
+        final CrmInvitation crmInvitation = parseInvitationArgument(invitation)
+        crmInvitation.status = CrmInvitation.SENT
+        crmInvitation.save()
+    }
+
     private CrmInvitation parseInvitationArgument(Object arg) {
         def invitation
         if (arg instanceof CrmInvitation) {
             invitation = arg
         } else {
-            invitation = CrmInvitation.get(arg.toString())
+            invitation = CrmInvitation.get(Long.valueOf(arg.toString()))
             if (!invitation) {
                 throw new IllegalArgumentException("CrmInvitation not found with id [$arg]")
             }
