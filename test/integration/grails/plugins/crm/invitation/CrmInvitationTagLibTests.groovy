@@ -9,7 +9,7 @@ class CrmInvitationTagLibTests extends GroovyPagesTestCase {
 
     def crmInvitationService
 
-    def testInvitationsFor() {
+    void testInvitationsFor() {
         crmInvitationService.createInvitation("test", null, "grails", "joe@acme.com")
         crmInvitationService.createInvitation("test", null, "grails", "liza@acme.com")
 
@@ -17,7 +17,7 @@ class CrmInvitationTagLibTests extends GroovyPagesTestCase {
         assert applyTemplate(template) == "joe@acme.comliza@acme.com".toString()
     }
 
-    def testInvitationsTo() {
+    void testInvitationsTo() {
         crmInvitationService.createInvitation("test", null, "grails", "joe@acme.com")
         crmInvitationService.createInvitation("test", null, "grails", "liza@acme.com")
         crmInvitationService.createInvitation("foo", null, "grails", "joe@acme.com")

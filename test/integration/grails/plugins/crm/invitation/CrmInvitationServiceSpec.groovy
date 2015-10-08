@@ -17,7 +17,7 @@
 
 package grails.plugins.crm.invitation
 
-class CrmInvitationServiceSpec extends grails.plugin.spock.IntegrationSpec {
+class CrmInvitationServiceSpec extends grails.test.spock.IntegrationSpec {
 
     def crmInvitationService
 

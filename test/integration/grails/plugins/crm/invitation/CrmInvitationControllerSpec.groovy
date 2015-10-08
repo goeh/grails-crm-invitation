@@ -21,7 +21,7 @@ import javax.servlet.http.HttpServletResponse
 /**
  * Test specification for CrmInvitationController.
  */
-class CrmInvitationControllerSpec extends grails.plugin.spock.IntegrationSpec {
+class CrmInvitationControllerSpec extends grails.test.spock.IntegrationSpec {
 
     def crmSecurityService
     def crmInvitationService
