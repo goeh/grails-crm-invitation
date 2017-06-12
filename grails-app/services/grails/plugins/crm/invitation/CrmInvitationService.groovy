@@ -175,7 +175,9 @@ class CrmInvitationService {
         def crmInvitation = parseInvitationArgument(invitation)
         crmInvitation.status = CrmInvitation.ACCEPTED
         crmInvitation.save()
-        event(for: "crmInvitation", topic: "accepted", data: crmInvitation.dao, fork: false)
+        def binding = crmInvitation.dao
+        binding.username = binding.sender
+        event(for: "crmInvitation", topic: "accepted", data: binding, fork: false)
     }
 
     /**
@@ -187,7 +189,9 @@ class CrmInvitationService {
         def crmInvitation = parseInvitationArgument(invitation)
         crmInvitation.status = CrmInvitation.DENIED
         crmInvitation.save()
-        event(for: "crmInvitation", topic: "denied", data: crmInvitation.dao, fork: false)
+        def binding = crmInvitation.dao
+        binding.username = binding.sender
+        event(for: "crmInvitation", topic: "denied", data: binding, fork: false)
     }
 
     /**
@@ -197,9 +201,10 @@ class CrmInvitationService {
      */
     void cancel(invitation) {
         def crmInvitation = parseInvitationArgument(invitation)
-        def info = crmInvitation.dao
+        def binding = crmInvitation.dao
+        binding.username = binding.sender
         crmInvitation.delete(flush: true)
-        event(for: "crmInvitation", topic: "deleted", data: info, fork: false)
+        event(for: "crmInvitation", topic: "deleted", data: binding, fork: false)
     }
 
     /**
