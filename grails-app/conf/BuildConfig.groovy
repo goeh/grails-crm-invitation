@@ -29,21 +29,21 @@ grails.project.dependency.resolution = {
     }
 
     plugins {
-        build(":release:3.0.1",
-                ":rest-client-builder:1.0.3") {
+        build(":release:3.1.2",
+                ":rest-client-builder:2.1.1") {
             export = false
         }
         test(":hibernate4:4.3.6.1") {
             export = false
         }
 
-        test(":codenarc:0.24.1") { export = false }
-        test(":code-coverage:2.0.3-3") { export = false }
+        //test(":codenarc:0.24.1") { export = false }
+        //test(":code-coverage:2.0.3-3") { export = false }
 
-        compile ":crm-core:2.4.3"
+        compile ":crm-core:2.4.5"
     }
 }
-
+/*
 codenarc.reports = {
     xmlReport('xml') {
         outputFile = 'target/CodeNarcReport.xml'
@@ -52,3 +52,4 @@ codenarc.reports = {
         outputFile = 'target/CodeNarcReport.html'
     }
 }
+*/
